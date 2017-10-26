@@ -20,7 +20,12 @@ pub struct HandlerContext<'a> {
 }
 
 impl<'a> HandlerContext<'a> {
-    pub fn new(server: &'a IrcServer, sender: &'a str, target: &'a String, message: &'a String) -> HandlerContext<'a> {
+    pub fn new(
+        server: &'a IrcServer,
+        sender: &'a str,
+        target: &'a String,
+        message: &'a String,
+    ) -> HandlerContext<'a> {
         HandlerContext {
             server: server,
             sender: sender,
@@ -39,7 +44,9 @@ fn maize_handler(context: &HandlerContext) {
 }
 
 fn hi_handler(context: &HandlerContext) {
-    let re = Regex::new(&format!(r"(?i)h(i?) {}", context.server.config().nickname())).unwrap();
+    let re = Regex::new(
+        &format!(r"(?i)h(i?) {}", context.server.config().nickname())
+    ).unwrap();
     let greetings = vec![
         "hi",
         "h",
@@ -48,17 +55,22 @@ fn hi_handler(context: &HandlerContext) {
         "ni hao",
         "fuck off",
         "piss off",
-        "get fucked"
+        "get fucked",
     ];
 
     if re.is_match(context.message) {
         let greeting = rand::thread_rng().choose(&greetings).unwrap();
-        context.server.send_privmsg(context.target, &format!("{} {}", greeting, context.sender)).unwrap();
+        context.server.send_privmsg(
+            context.target,
+            &format!("{} {}", greeting, context.sender)
+        ).unwrap();
     }
 }
 
 fn youtube_handler(context: &HandlerContext) {
-    let re = Regex::new(r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*").unwrap();
+    let re = Regex::new(
+        r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*"
+    ).unwrap();
 
     if let Some(captures) = re.captures(context.message) {
         let video = Rafy::new(&captures["video_id"]).unwrap();
