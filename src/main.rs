@@ -72,27 +72,30 @@ fn youtube_handler(context: &HandlerContext) {
         r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*"
     ).unwrap();
 
-    if let Some(captures) = re.captures(context.message) {
-        let video = match Rafy::new(&captures["video_id"]) {
-            Ok(video) => video,
-            Err(_) => return (),
-        };
+    let captures = match re.captures(context.message) {
+        Some(captures) => captures,
+        None => return (), // bail, there was no youtube video found in the message
+    };
 
-        let duration = Duration::seconds(i64::from(video.length));
-        let tm = time::empty_tm() + duration;
+    let video = match Rafy::new(&captures["video_id"]) {
+        Ok(video) => video,
+        Err(_) => return (), // bail, failed to get video information
+    };
 
-        let message = format!(
-            "\x02{title}\x0F [{duration}] {views} views (+\x0303{likes}\x0F|-\x0304{dislikes}\x0F) \x02{permalink}\x0F",
-            title = video.title,
-            duration = tm.strftime("%X").unwrap(),
-            views = video.viewcount,
-            likes = video.likes,
-            dislikes = video.dislikes,
-            permalink = format!("https://youtu.be/{id}", id = video.videoid),
-        );
+    let duration = Duration::seconds(i64::from(video.length));
+    let tm = time::empty_tm() + duration;
 
-        context.server.send_privmsg(context.target, &message).unwrap();
-    }
+    let message = format!(
+        "\x02{title}\x0F [{duration}] {views} views (+\x0303{likes}\x0F|-\x0304{dislikes}\x0F) \x02{permalink}\x0F",
+        title = video.title,
+        duration = tm.strftime("%X").unwrap(),
+        views = video.viewcount,
+        likes = video.likes,
+        dislikes = video.dislikes,
+        permalink = format!("https://youtu.be/{id}", id = video.videoid),
+    );
+
+    context.server.send_privmsg(context.target, &message).unwrap();
 }
 
 fn main() {
