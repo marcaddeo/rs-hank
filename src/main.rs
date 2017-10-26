@@ -86,13 +86,13 @@ fn youtube_handler(context: &HandlerContext) {
     let tm = time::empty_tm() + duration;
 
     let message = format!(
-        "\x02{title}\x0F [{duration}] {views} views (+\x0303{likes}\x0F|-\x0304{dislikes}\x0F) \x02{permalink}\x0F",
-        title = video.title,
+        "{title} [{duration}] {views} views (+{likes}|-{dislikes}) {permalink}",
+        title = format!("\x02{}\x0F", video.title),
         duration = tm.strftime("%X").unwrap(),
         views = video.viewcount,
-        likes = video.likes,
-        dislikes = video.dislikes,
-        permalink = format!("https://youtu.be/{id}", id = video.videoid),
+        likes = format!("\x0303{}\x0F", video.likes),
+        dislikes = format!("\x0304{}\x0F", video.dislikes),
+        permalink = format!("\x02https://youtu.be/{}\x0F", video.videoid),
     );
 
     context.server.send_privmsg(context.target, &message).unwrap();
