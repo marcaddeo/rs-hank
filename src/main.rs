@@ -96,7 +96,7 @@ fn main() {
         nickname: Some(format!("Hank")),
         nick_password: Some(env::var("HANK_PASS").unwrap()),
         server: Some(format!("irc.rizon.net")),
-        channels: Some(vec![format!("#rainbow.tv-test")]),
+        channels: Some(vec![env::var("HANK_CHANNEL").unwrap()]),
         .. Default::default()
     };
     let server = IrcServer::from_config(config).unwrap();
