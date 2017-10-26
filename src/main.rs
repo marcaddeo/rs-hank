@@ -73,7 +73,11 @@ fn youtube_handler(context: &HandlerContext) {
     ).unwrap();
 
     if let Some(captures) = re.captures(context.message) {
-        let video = Rafy::new(&captures["video_id"]).unwrap();
+        let video = match Rafy::new(&captures["video_id"]) {
+            Ok(video) => video,
+            Err(_) => return (),
+        };
+
         let duration = Duration::seconds(i64::from(video.length));
         let tm = time::empty_tm() + duration;
 
