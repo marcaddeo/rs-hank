@@ -11,6 +11,8 @@ use rand::Rng;
 use rafy::Rafy;
 use time::Duration;
 use std::env;
+use std::time::Duration as StdDuration;
+use std::thread;
 
 pub struct HandlerContext<'a> {
     server: &'a IrcServer,
@@ -130,6 +132,10 @@ fn main() {
                     );
                     handler(&context);
                 }
+            },
+            Command::KICK(ref channel, _, _) => {
+                thread::sleep(StdDuration::from_millis(2000));
+                server.send_join(channel).unwrap();
             },
             _ => (),
         }
