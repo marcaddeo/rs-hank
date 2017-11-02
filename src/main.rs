@@ -3,6 +3,8 @@ extern crate regex;
 extern crate rand;
 extern crate rafy;
 extern crate time;
+extern crate curl;
+extern crate serde_json;
 
 use std::default::Default;
 use irc::client::prelude::*;
@@ -13,6 +15,8 @@ use time::Duration;
 use std::env;
 use std::time::Duration as StdDuration;
 use std::thread;
+use curl::easy::Easy;
+use serde_json::Value;
 
 pub struct HandlerContext<'a> {
     server: &'a IrcServer,
@@ -110,6 +114,36 @@ fn rejoin_handler(context: &HandlerContext) {
     });
 }
 
+fn btc_handler(context: &HandlerContext) {
+    let re = Regex::new(r"^.btc$").unwrap();
+
+    if !re.is_match(context.message) {
+        return;
+    }
+
+    let mut data = Vec::new();
+    let mut easy = Easy::new();
+    easy.url("https://blockchain.info/ticker").unwrap();
+    {
+        let mut transfer = easy.transfer();
+        transfer.write_function(|new_data| {
+            data.extend_from_slice(new_data);
+            Ok(new_data.len())
+        }).unwrap();
+        transfer.perform().unwrap();
+    }
+    let body = String::from_utf8(data.to_vec()).unwrap();
+    let json: Value = serde_json::from_str(&body).unwrap();
+
+    let message = format!(
+        "{}{}",
+        json["USD"]["symbol"].as_str().unwrap(),
+        json["USD"]["last"],
+    );
+
+    context.server.send_privmsg(context.target, &message).unwrap();
+}
+
 fn main() {
     let config = Config {
         nickname: Some(format!("Hank")),
@@ -126,6 +160,7 @@ fn main() {
         maize_handler,
         hi_handler,
         youtube_handler,
+        btc_handler,
     ];
 
     server.for_each_incoming(|message| {
