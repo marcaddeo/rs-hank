@@ -136,7 +136,7 @@ fn btc_handler(context: &HandlerContext) {
     let json: Value = serde_json::from_str(&body).unwrap();
 
     let message = format!(
-        "{}{}",
+        "{}{:.3}",
         json["USD"]["symbol"].as_str().unwrap(),
         json["USD"]["last"],
     );
