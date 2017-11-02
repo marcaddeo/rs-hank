@@ -100,6 +100,16 @@ fn youtube_handler(context: &HandlerContext) {
     context.server.send_privmsg(context.target, &message).unwrap();
 }
 
+fn rejoin_handler(context: &HandlerContext) {
+    let server = context.server.clone();
+    let channel = context.message.clone();
+
+    thread::spawn(move || {
+        thread::sleep(StdDuration::from_millis(2000));
+        server.send_join(&channel).unwrap();
+    });
+}
+
 fn main() {
     let config = Config {
         nickname: Some(format!("Hank")),
@@ -133,9 +143,14 @@ fn main() {
                     handler(&context);
                 }
             },
-            Command::KICK(ref channel, _, _) => {
-                thread::sleep(StdDuration::from_millis(2000));
-                server.send_join(channel).unwrap();
+            Command::KICK(ref channel, ref target, _) => {
+                let context = HandlerContext::new(
+                    &server,
+                    &message.source_nickname().unwrap(),
+                    &target,
+                    &channel
+                );
+                rejoin_handler(&context);
             },
             _ => (),
         }
