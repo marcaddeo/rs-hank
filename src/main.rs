@@ -159,7 +159,7 @@ fn main() {
     let privmsg_handlers: Vec<fn (&HandlerContext)> = vec![
         maize_handler,
         hi_handler,
-        youtube_handler,
+        // youtube_handler,
         btc_handler,
     ];
 
