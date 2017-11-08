@@ -80,7 +80,6 @@ fn hi_handler(context: &HandlerContext) {
     }
 }
 
-
 fn youtube_handler(context: &HandlerContext) {
     let re = Regex::new(
         r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*"
