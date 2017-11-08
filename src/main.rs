@@ -40,6 +40,14 @@ impl<'a> HandlerContext<'a> {
     }
 }
 
+fn nop_handler(context: &HandlerContext) {
+    let re = Regex::new(r"^.nop$").unwrap();
+
+    if re.is_match(context.message)) {
+        context.server.send_privmsg(context.target, "nop pls").unwrap();
+    }
+}
+
 fn maize_handler(context: &HandlerContext) {
     let re = Regex::new(r"^[o]+[h]+$").unwrap();
 
@@ -71,6 +79,7 @@ fn hi_handler(context: &HandlerContext) {
         ).unwrap();
     }
 }
+
 
 fn youtube_handler(context: &HandlerContext) {
     let re = Regex::new(
