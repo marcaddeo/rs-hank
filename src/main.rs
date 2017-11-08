@@ -1,7 +1,6 @@
 extern crate irc;
 extern crate regex;
 extern crate rand;
-extern crate rafy;
 extern crate time;
 extern crate curl;
 extern crate serde_json;
@@ -10,7 +9,6 @@ use std::default::Default;
 use irc::client::prelude::*;
 use regex::Regex;
 use rand::Rng;
-use rafy::Rafy;
 use time::Duration;
 use std::env;
 use std::time::Duration as StdDuration;
@@ -83,22 +81,44 @@ fn youtube_handler(context: &HandlerContext) {
         None => return (), // bail, there was no youtube video found in the message
     };
 
-    let video = match Rafy::new(&captures["video_id"]) {
-        Ok(video) => video,
-        Err(_) => return (), // bail, failed to get video information
-    };
+    let mut data = Vec::new();
+    let mut easy = Easy::new();
+    let url = format!(
+        "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id={video_id}&key={api_key}",
+        video_id = &captures["video_id"],
+        api_key = "AIzaSyDBeww874dGqttfyzwuiHzT46fPSC9ulQA",
+    );
+    easy.url(&url).unwrap();
+    {
+        let mut transfer = easy.transfer();
+        transfer.write_function(|new_data| {
+            data.extend_from_slice(new_data);
+            Ok(new_data.len())
+        }).unwrap();
+        transfer.perform().unwrap();
+    }
+    let body = String::from_utf8(data.to_vec()).unwrap();
+    let json: Value = serde_json::from_str(&body).unwrap();
+    let video = &json["items"][0];
+    let video_title: String = serde_json::from_value(video["snippet"]["title"].clone()).unwrap();
+    let video_duration: String = serde_json::from_value(video["contentDetails"]["duration"].clone()).unwrap();
+    let video_definition: String = serde_json::from_value(video["contentDetails"]["definition"].clone()).unwrap();
+    let video_views: String = serde_json::from_value(video["statistics"]["viewCount"].clone()).unwrap();
+    let video_likes: String = serde_json::from_value(video["statistics"]["likeCount"].clone()).unwrap();
+    let video_dislikes: String = serde_json::from_value(video["statistics"]["dislikeCount"].clone()).unwrap();
 
-    let duration = Duration::seconds(i64::from(video.length));
+    let duration = parse_duration(&video_duration).unwrap();
     let tm = time::empty_tm() + duration;
 
     let message = format!(
-        "{title} [{duration}] {views} views (+{likes}|-{dislikes}) {permalink}",
-        title = format!("\x02{}\x0F", video.title),
+        "{title} [{duration}] {definition} {views} views (+{likes}|-{dislikes}) {permalink}",
+        title = format!("\x02{}\x0F", video_title),
         duration = tm.strftime("%X").unwrap(),
-        views = video.viewcount,
-        likes = format!("\x0303{}\x0F", video.likes),
-        dislikes = format!("\x0304{}\x0F", video.dislikes),
-        permalink = format!("\x02https://youtu.be/{}\x0F", video.videoid),
+        definition = format!("\x02\x0304{}\x0F", video_definition.to_uppercase()),
+        views = video_views,
+        likes = format!("\x0303{}\x0F", video_likes),
+        dislikes = format!("\x0304{}\x0F", video_dislikes),
+        permalink = format!("\x02https://youtu.be/{}\x0F", &captures["video_id"]),
     );
 
     context.server.send_privmsg(context.target, &message).unwrap();
@@ -144,6 +164,58 @@ fn btc_handler(context: &HandlerContext) {
     context.server.send_privmsg(context.target, &message).unwrap();
 }
 
+#[derive(Debug)]
+enum ParseError {
+    RegexError,
+    InvalidPeriod,
+}
+
+fn parse_duration(period: &str) -> Result<Duration, ParseError> {
+    let re = match Regex::new(r"^(-|\+)?P(?:(?P<years>[-+]?[0-9,.]*)Y)?(?:(?P<months>[-+]?[0-9,.]*)M)?(?:(?P<weeks>[-+]?[0-9,.]*)W)?(?:(?P<days>[-+]?[0-9,.]*)D)?(?:T(?:(?P<hours>[-+]?[0-9,.]*)H)?(?:(?P<minutes>[-+]?[0-9,.]*)M)?(?:(?P<seconds>[-+]?[0-9,.]*)S)?)?$") {
+        Ok(re) => re,
+        Err(_) => {
+            return Err(ParseError::RegexError);
+        },
+    };
+
+    if !re.is_match(period) {
+        return Err(ParseError::InvalidPeriod);
+    }
+
+    let captures = match re.captures(period) {
+        Some(captures) => captures,
+        None => {
+            return Err(ParseError::InvalidPeriod);
+        },
+    };
+
+    let mut seconds: i64 = 0;
+    for name in re.capture_names() {
+        let capture_name = match name {
+            Some(capture_name) => capture_name,
+            None => continue,
+        };
+        let value = match captures.name(capture_name) {
+            Some(value) => value.as_str().parse::<i64>().unwrap(),
+            None => continue,
+        };
+        let multiplier = match capture_name {
+            "years" => 31557600,
+            "months" => 2629800,
+            "weeks" => 606877,
+            "days" => 86460,
+            "hours" => 3600,
+            "minutes" => 60,
+            "seconds" => 1,
+            _ => 0,
+        };
+
+        seconds += value * multiplier;
+    }
+
+    Ok(Duration::seconds(seconds))
+}
+
 fn main() {
     let config = Config {
         nickname: Some(format!("Hank")),
@@ -159,7 +231,7 @@ fn main() {
     let privmsg_handlers: Vec<fn (&HandlerContext)> = vec![
         maize_handler,
         hi_handler,
-        // youtube_handler,
+        youtube_handler,
         btc_handler,
     ];
 
