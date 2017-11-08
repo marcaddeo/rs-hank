@@ -43,7 +43,7 @@ impl<'a> HandlerContext<'a> {
 fn nop_handler(context: &HandlerContext) {
     let re = Regex::new(r"^.nop$").unwrap();
 
-    if re.is_match(context.message)) {
+    if re.is_match(context.message) {
         context.server.send_privmsg(context.target, "nop pls").unwrap();
     }
 }
