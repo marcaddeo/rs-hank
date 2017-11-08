@@ -1,3 +1,4 @@
+extern crate hank;
 extern crate irc;
 extern crate regex;
 extern crate rand;
@@ -9,12 +10,12 @@ use std::default::Default;
 use irc::client::prelude::*;
 use regex::Regex;
 use rand::Rng;
-use time::Duration;
 use std::env;
-use std::time::Duration as StdDuration;
+use std::time::Duration;
 use std::thread;
 use curl::easy::Easy;
 use serde_json::Value;
+use hank::duration::parse_duration;
 
 pub struct HandlerContext<'a> {
     server: &'a IrcServer,
@@ -129,7 +130,7 @@ fn rejoin_handler(context: &HandlerContext) {
     let channel = context.message.clone();
 
     thread::spawn(move || {
-        thread::sleep(StdDuration::from_millis(2000));
+        thread::sleep(Duration::from_millis(2000));
         server.send_join(&channel).unwrap();
     });
 }
@@ -162,58 +163,6 @@ fn btc_handler(context: &HandlerContext) {
     );
 
     context.server.send_privmsg(context.target, &message).unwrap();
-}
-
-#[derive(Debug)]
-enum ParseError {
-    RegexError,
-    InvalidPeriod,
-}
-
-fn parse_duration(period: &str) -> Result<Duration, ParseError> {
-    let re = match Regex::new(r"^(-|\+)?P(?:(?P<years>[-+]?[0-9,.]*)Y)?(?:(?P<months>[-+]?[0-9,.]*)M)?(?:(?P<weeks>[-+]?[0-9,.]*)W)?(?:(?P<days>[-+]?[0-9,.]*)D)?(?:T(?:(?P<hours>[-+]?[0-9,.]*)H)?(?:(?P<minutes>[-+]?[0-9,.]*)M)?(?:(?P<seconds>[-+]?[0-9,.]*)S)?)?$") {
-        Ok(re) => re,
-        Err(_) => {
-            return Err(ParseError::RegexError);
-        },
-    };
-
-    if !re.is_match(period) {
-        return Err(ParseError::InvalidPeriod);
-    }
-
-    let captures = match re.captures(period) {
-        Some(captures) => captures,
-        None => {
-            return Err(ParseError::InvalidPeriod);
-        },
-    };
-
-    let mut seconds: i64 = 0;
-    for name in re.capture_names() {
-        let capture_name = match name {
-            Some(capture_name) => capture_name,
-            None => continue,
-        };
-        let value = match captures.name(capture_name) {
-            Some(value) => value.as_str().parse::<i64>().unwrap(),
-            None => continue,
-        };
-        let multiplier = match capture_name {
-            "years" => 31557600,
-            "months" => 2629800,
-            "weeks" => 606877,
-            "days" => 86460,
-            "hours" => 3600,
-            "minutes" => 60,
-            "seconds" => 1,
-            _ => 0,
-        };
-
-        seconds += value * multiplier;
-    }
-
-    Ok(Duration::seconds(seconds))
 }
 
 fn main() {

@@ -3,6 +3,14 @@ name = "hank"
 version = "0.1.0"
 authors = ["Marc Addeo <marcaddeo@gmail.com>"]
 
+[lib]
+name = "hank"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hank"
+path = "src/main.rs"
+
 [dependencies]
 irc = "0.12"
 regex = "0.2"
