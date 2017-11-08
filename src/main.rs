@@ -86,7 +86,7 @@ fn youtube_handler(context: &HandlerContext) {
     let url = format!(
         "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id={video_id}&key={api_key}",
         video_id = &captures["video_id"],
-        api_key = "AIzaSyDBeww874dGqttfyzwuiHzT46fPSC9ulQA",
+        api_key = env::var("HANK_YOUTUBE_API_KEY").unwrap(),
     );
     easy.url(&url).unwrap();
     {
