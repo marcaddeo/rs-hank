@@ -188,6 +188,7 @@ fn main() {
 
     let privmsg_handlers: Vec<fn (&HandlerContext)> = vec![
         maize_handler,
+        nop_handler,
         hi_handler,
         youtube_handler,
         btc_handler,
