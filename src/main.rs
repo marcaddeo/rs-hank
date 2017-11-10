@@ -48,6 +48,14 @@ fn nop_handler(context: &HandlerContext) {
     }
 }
 
+fn nm_handler(context: &HandlerContext) {
+  let re = Regex::new(r"^nmu$").unwrap();
+
+  if re.is_match(context.message) {
+    context.server.send_privmsg(context.target, "nm").unwrap();
+  }
+}
+
 fn maize_handler(context: &HandlerContext) {
     let re = Regex::new(r"^[o]+[h]+$").unwrap();
 
@@ -188,6 +196,7 @@ fn main() {
     let privmsg_handlers: Vec<fn (&HandlerContext)> = vec![
         maize_handler,
         nop_handler,
+        nm_handler,
         hi_handler,
         youtube_handler,
         btc_handler,
