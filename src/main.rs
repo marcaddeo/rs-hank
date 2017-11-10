@@ -48,7 +48,7 @@ fn nop_handler(context: &HandlerContext) {
     }
 }
 
-fn nm_handler(context: & HandlerContext) {
+fn nm_handler(context: &HandlerContext) {
   let re = Regex::new(r"^nmu$").unwrap();
 
   if re.is_match(context.message) {
