@@ -42,7 +42,7 @@ fn run() -> Result<()> {
 
     server.identify().unwrap();
 
-    let privmsg_handlers: Vec<fn (&HandlerContext)> = vec![
+    let privmsg_handlers: Vec<fn (&HandlerContext) -> Result<()>> = vec![
         maize_handler,
         nop_handler,
         nm_handler,
@@ -63,7 +63,7 @@ fn run() -> Result<()> {
                         &target,
                         &msg
                     );
-                    handler(&context);
+                    handler(&context).unwrap();
                 }
             },
             Command::KICK(ref channel, ref target, _) => {
@@ -73,7 +73,7 @@ fn run() -> Result<()> {
                     &target,
                     &channel
                 );
-                rejoin_handler(&context);
+                rejoin_handler(&context).unwrap();
             },
             _ => (),
         }
