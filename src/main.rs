@@ -63,7 +63,10 @@ fn run() -> Result<()> {
                         &target,
                         &msg
                     );
-                    handler(&context).unwrap();
+                    match handler(&context) {
+                        Ok(()) => (),
+                        Err(_) => (),
+                    }
                 }
             },
             Command::KICK(ref channel, ref target, _) => {
@@ -73,7 +76,10 @@ fn run() -> Result<()> {
                     &target,
                     &channel
                 );
-                rejoin_handler(&context).unwrap();
+                match rejoin_handler(&context) {
+                    Ok(()) => (),
+                    Err(_) => (),
+                }
             },
             _ => (),
         }
