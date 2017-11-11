@@ -183,7 +183,7 @@ fn btc_handler(context: &HandlerContext) {
 
 fn main() {
     let config = Config {
-        nickname: Some(format!("Hank")),
+        nickname: Some(env::var("HANK_NICK").unwrap_or(format!("Hank"))),
         nick_password: Some(env::var("HANK_PASS").unwrap()),
         server: Some(format!("irc.rizon.net")),
         channels: Some(vec![env::var("HANK_CHANNEL").unwrap()]),
