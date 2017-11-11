@@ -10,6 +10,7 @@ use serde_json;
 use serde_json::Value;
 use irc::client::prelude::*;
 use duration::parse_duration;
+use errors::*;
 
 pub struct HandlerContext<'a> {
     server: &'a IrcServer,
@@ -34,31 +35,37 @@ impl<'a> HandlerContext<'a> {
     }
 }
 
-pub fn nop_handler(context: &HandlerContext) {
+pub fn nop_handler(context: &HandlerContext) -> Result<()> {
     let re = Regex::new(r"^.nop$").unwrap();
 
     if re.is_match(context.message) {
         context.server.send_privmsg(context.target, "nop pls").unwrap();
     }
+
+    Ok(())
 }
 
-pub fn nm_handler(context: &HandlerContext) {
+pub fn nm_handler(context: &HandlerContext) -> Result<()> {
   let re = Regex::new(r"^nmu$").unwrap();
 
   if re.is_match(context.message) {
     context.server.send_privmsg(context.target, "nm").unwrap();
   }
+
+  Ok(())
 }
 
-pub fn maize_handler(context: &HandlerContext) {
+pub fn maize_handler(context: &HandlerContext) -> Result<()> {
     let re = Regex::new(r"^[o]+[h]+$").unwrap();
 
     if re.is_match(context.message) {
         context.server.send_privmsg(context.target, "maize").unwrap();
     }
+
+    Ok(())
 }
 
-pub fn hi_handler(context: &HandlerContext) {
+pub fn hi_handler(context: &HandlerContext) -> Result<()> {
     let re = Regex::new(
         &format!(r"(?i)h(i?) {}", context.server.config().nickname())
     ).unwrap();
@@ -80,16 +87,18 @@ pub fn hi_handler(context: &HandlerContext) {
             &format!("{} {}", greeting, context.sender)
         ).unwrap();
     }
+
+    Ok(())
 }
 
-pub fn youtube_handler(context: &HandlerContext) {
+pub fn youtube_handler(context: &HandlerContext) -> Result<()> {
     let re = Regex::new(
         r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*"
     ).unwrap();
 
     let captures = match re.captures(context.message) {
         Some(captures) => captures,
-        None => return (), // bail, there was no youtube video found in the message
+        None => return Ok(()), // bail, there was no youtube video found in the message
     };
 
     let mut data = Vec::new();
@@ -133,9 +142,11 @@ pub fn youtube_handler(context: &HandlerContext) {
     );
 
     context.server.send_privmsg(context.target, &message).unwrap();
+
+    Ok(())
 }
 
-pub fn rejoin_handler(context: &HandlerContext) {
+pub fn rejoin_handler(context: &HandlerContext) -> Result<()> {
     let server = context.server.clone();
     let channel = context.message.clone();
 
@@ -143,13 +154,15 @@ pub fn rejoin_handler(context: &HandlerContext) {
         thread::sleep(Duration::from_millis(2000));
         server.send_join(&channel).unwrap();
     });
+
+    Ok(())
 }
 
-pub fn btc_handler(context: &HandlerContext) {
+pub fn btc_handler(context: &HandlerContext) -> Result<()> {
     let re = Regex::new(r"^.btc$").unwrap();
 
     if !re.is_match(context.message) {
-        return;
+        return Ok(());
     }
 
     let mut data = Vec::new();
@@ -173,5 +186,6 @@ pub fn btc_handler(context: &HandlerContext) {
     );
 
     context.server.send_privmsg(context.target, &message).unwrap();
-}
 
+    Ok(())
+}
