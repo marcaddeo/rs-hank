@@ -33,14 +33,14 @@ fn main() {
 fn run() -> Result<()> {
     let config = Config {
         nickname: Some(env::var("HANK_NICK").unwrap_or(format!("Hank"))),
-        nick_password: Some(env::var("HANK_PASS").unwrap()),
+        nick_password: Some(env::var("HANK_PASS")?),
         server: Some(format!("irc.rizon.net")),
-        channels: Some(vec![env::var("HANK_CHANNEL").unwrap()]),
+        channels: Some(vec![env::var("HANK_CHANNEL")?]),
         .. Default::default()
     };
-    let server = IrcServer::from_config(config).unwrap();
+    let server = IrcServer::from_config(config)?;
 
-    server.identify().unwrap();
+    server.identify()?;
 
     let privmsg_handlers: Vec<fn (&HandlerContext) -> Result<()>> = vec![
         maize_handler,
@@ -77,7 +77,7 @@ fn run() -> Result<()> {
             },
             _ => (),
         }
-    }).unwrap();
+    })?;
 
     Ok(())
 }
