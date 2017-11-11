@@ -1,16 +1,9 @@
-use std::num::ParseIntError;
 use time::Duration;
-use regex::{Regex, Error as RegexError};
+use regex::Regex;
+use errors::*;
 
-#[derive(Debug)]
-pub enum ParseError {
-    ParseIntError(ParseIntError),
-    RegexError(RegexError),
-    InvalidDuration(String),
-}
-
-pub fn parse_duration(period: &str) -> Result<Duration, ParseError> {
-    let re = match Regex::new(r"(?x)
+pub fn parse_duration(period: &str) -> Result<Duration> {
+    let re = Regex::new(r"(?x)
         ^(-|\+)?P
         (?:(?P<years>[-+]?[0-9,.]*)Y)?
         (?:(?P<months>[-+]?[0-9,.]*)M)?
@@ -19,20 +12,11 @@ pub fn parse_duration(period: &str) -> Result<Duration, ParseError> {
         (?:T(?:(?P<hours>[-+]?[0-9,.]*)H)?
         (?:(?P<minutes>[-+]?[0-9,.]*)M)?
         (?:(?P<seconds>[-+]?[0-9,.]*)S)?)?$
-    ") {
-        Ok(re) => re,
-        Err(error) => {
-            return Err(ParseError::RegexError(error));
-        },
-    };
+    ")?;
 
     let captures = match re.captures(period) {
         Some(captures) => captures,
-        None => {
-            return Err(ParseError::InvalidDuration(
-                "Could not find a valid ISO 8601 duration".to_string()
-            ));
-        },
+        None => bail!(ErrorKind::InvalidDuration),
     };
 
     let mut seconds: i64 = 0;
@@ -42,14 +26,7 @@ pub fn parse_duration(period: &str) -> Result<Duration, ParseError> {
             None => continue,
         };
         let value = match captures.name(capture_name) {
-            Some(value) => {
-                match value.as_str().parse::<i64>() {
-                    Ok(value) => value,
-                    Err(error) => {
-                        return Err(ParseError::ParseIntError(error));
-                    },
-                }
-            },
+            Some(value) => value.as_str().parse::<i64>()?,
             None => continue,
         };
         let multiplier = match capture_name {

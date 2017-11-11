@@ -127,7 +127,7 @@ pub fn youtube_handler(context: &HandlerContext) -> Result<()> {
     let video_likes: String = serde_json::from_value(video["statistics"]["likeCount"].clone())?;
     let video_dislikes: String = serde_json::from_value(video["statistics"]["dislikeCount"].clone())?;
 
-    let duration = parse_duration(&video_duration).unwrap();
+    let duration = parse_duration(&video_duration)?;
     let tm = time::empty_tm() + duration;
 
     let message = format!(
