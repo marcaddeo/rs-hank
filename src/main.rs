@@ -10,7 +10,12 @@ use hank::errors::*;
 use hank::handlers::*;
 
 fn main() {
-    if let Err(ref error) = run() {
+    print_error_chain(run(), true);
+    ::std::process::exit(1);
+}
+
+fn print_error_chain(error: Result<()>, backtrace: bool) {
+    if let Err(ref error) = error {
         use std::io::Write;
         let stderr = &mut ::std::io::stderr();
         let error_message = "Error writing to stderr";
@@ -21,12 +26,13 @@ fn main() {
             writeln!(stderr, "Caused by: {}", error).expect(error_message);
         }
 
-        if let Some(backtrace) = error.backtrace() {
-            writeln!(stderr, "Backtrace: {:?}", backtrace)
-                .expect(error_message);
-        }
+        if backtrace {
+            if let Some(backtrace) = error.backtrace() {
+                writeln!(stderr, "Backtrace: {:?}", backtrace)
+                    .expect(error_message);
+            }
 
-        ::std::process::exit(1);
+        }
     }
 }
 
