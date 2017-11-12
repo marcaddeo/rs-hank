@@ -10,29 +10,29 @@ use hank::errors::*;
 use hank::handlers::*;
 
 fn main() {
-    print_error_chain(run(), true);
-    ::std::process::exit(1);
+    if let Err(error) = run() {
+        print_error_chain(error, true);
+        ::std::process::exit(1);
+    }
 }
 
-fn print_error_chain(error: Result<()>, backtrace: bool) {
-    if let Err(ref error) = error {
-        use std::io::Write;
-        let stderr = &mut ::std::io::stderr();
-        let error_message = "Error writing to stderr";
+fn print_error_chain(error: Error, backtrace: bool) {
+    use std::io::Write;
+    let stderr = &mut ::std::io::stderr();
+    let error_message = "Error writing to stderr";
 
-        writeln!(stderr, "Error: {}", error).expect(error_message);
+    writeln!(stderr, "Error: {}", error).expect(error_message);
 
-        for error in error.iter().skip(1) {
-            writeln!(stderr, "Caused by: {}", error).expect(error_message);
+    for error in error.iter().skip(1) {
+        writeln!(stderr, "Caused by: {}", error).expect(error_message);
+    }
+
+    if backtrace {
+        if let Some(backtrace) = error.backtrace() {
+            writeln!(stderr, "Backtrace: {:?}", backtrace)
+                .expect(error_message);
         }
 
-        if backtrace {
-            if let Some(backtrace) = error.backtrace() {
-                writeln!(stderr, "Backtrace: {:?}", backtrace)
-                    .expect(error_message);
-            }
-
-        }
     }
 }
 
@@ -69,10 +69,9 @@ fn run() -> Result<()> {
                         &target,
                         &msg
                     );
-                    let result = handler(&context);
-                    match result {
+                    match handler(&context) {
                         Ok(()) => (),
-                        Err(_) => print_error_chain(result, false),
+                        Err(error) => print_error_chain(error, false),
                     }
                 }
             },
@@ -83,10 +82,9 @@ fn run() -> Result<()> {
                     &target,
                     &channel
                 );
-                let result = rejoin_handler(&context);
-                match result {
+                match rejoin_handler(&context) {
                     Ok(()) => (),
-                    Err(_) => print_error_chain(result, false),
+                    Err(error) => print_error_chain(error, false),
                 }
             },
             _ => (),
