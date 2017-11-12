@@ -9,5 +9,5 @@ extern crate serde_json;
 extern crate irc;
 
 pub mod errors;
-pub mod handlers;
 pub mod duration;
+pub mod plugin;

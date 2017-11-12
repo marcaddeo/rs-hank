@@ -14,7 +14,6 @@ error_chain! {
         InvalidDuration {
             description("Could not find a valid ISO 8601 duration."),
             display("Could not find a valid ISO 8601 duration."),
-
         }
     }
 }

@@ -1,13 +1,11 @@
 extern crate hank;
 extern crate irc;
-extern crate regex;
-extern crate time;
 
+use std::env;
 use std::default::Default;
 use irc::client::prelude::*;
-use std::env;
+use hank::plugin::*;
 use hank::errors::*;
-use hank::handlers::*;
 
 fn main() {
     if let Err(error) = run() {
@@ -48,46 +46,27 @@ fn run() -> Result<()> {
 
     server.identify()?;
 
-    let privmsg_handlers: Vec<fn (&HandlerContext) -> Result<()>> = vec![
-        maize_handler,
-        nop_handler,
-        nm_handler,
-        hi_handler,
-        youtube_handler,
-        btc_handler,
+    let plugins: Vec<Box<Plugin>> = vec![
+        Box::new(rejoin_plugin::RejoinPlugin),
+        Box::new(youtube_plugin::YoutubePlugin),
+        Box::new(nop_plugin::NopPlugin),
+        Box::new(hi_plugin::HiPlugin),
+        Box::new(nm_plugin::NmPlugin),
+        Box::new(maize_plugin::MaizePlugin),
+        Box::new(btc_plugin::BtcPlugin),
     ];
 
     server.for_each_incoming(|message| {
         print!("{}", message);
 
-        match message.command {
-            Command::PRIVMSG(ref target, ref msg) => {
-                for handler in privmsg_handlers.iter() {
-                    let context = HandlerContext::new(
-                        &server,
-                        &message.source_nickname().unwrap(),
-                        &target,
-                        &msg
-                    );
-                    match handler(&context) {
-                        Ok(()) => (),
-                        Err(error) => print_error_chain(error, false),
-                    }
-                }
-            },
-            Command::KICK(ref channel, ref target, _) => {
-                let context = HandlerContext::new(
-                    &server,
-                    &message.source_nickname().unwrap(),
-                    &target,
-                    &channel
-                );
-                match rejoin_handler(&context) {
+        let context = PluginContext::new(&server, &message);
+        for plugin in plugins.iter() {
+            if plugin.will_handle(message.command.clone()) {
+                match plugin.handle(&context) {
                     Ok(()) => (),
                     Err(error) => print_error_chain(error, false),
                 }
-            },
-            _ => (),
+            }
         }
     })?;
 
