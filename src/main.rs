@@ -69,9 +69,10 @@ fn run() -> Result<()> {
                         &target,
                         &msg
                     );
-                    match handler(&context) {
+                    let result = handler(&context);
+                    match result {
                         Ok(()) => (),
-                        Err(_) => (),
+                        Err(_) => print_error_chain(result, false),
                     }
                 }
             },
@@ -82,9 +83,10 @@ fn run() -> Result<()> {
                     &target,
                     &channel
                 );
-                match rejoin_handler(&context) {
+                let result = rejoin_handler(&context);
+                match result {
                     Ok(()) => (),
-                    Err(_) => (),
+                    Err(_) => print_error_chain(result, false),
                 }
             },
             _ => (),
