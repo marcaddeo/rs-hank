@@ -8,6 +8,7 @@ pub mod hi_plugin;
 pub mod nm_plugin;
 pub mod maize_plugin;
 pub mod btc_plugin;
+pub mod lmgtfy_plugin;
 
 pub trait Plugin: 'static {
     fn will_handle(&self, command: Command) -> bool;

@@ -8,6 +8,7 @@ error_chain! {
         SerdeJsonError(::serde_json::Error);
         TimeError(::time::ParseError);
         ParseIntError(::std::num::ParseIntError);
+        UrlParseError(::url::ParseError);
     }
 
     errors {

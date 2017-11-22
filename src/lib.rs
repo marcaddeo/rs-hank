@@ -7,6 +7,7 @@ extern crate time;
 extern crate curl;
 extern crate serde_json;
 extern crate irc;
+extern crate url;
 
 pub mod errors;
 pub mod duration;
