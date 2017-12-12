@@ -17,7 +17,7 @@ impl Plugin for BtcPlugin {
 
     fn handle(&self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
-            let re = Regex::new(r"^.btc$")?;
+            let re = Regex::new(r"^\.btc$")?;
 
             if !re.is_match(&msg) {
                 return Ok(());

@@ -14,7 +14,7 @@ impl Plugin for NopPlugin {
 
     fn handle(&self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
-            let re = Regex::new(r"^.nop$")?;
+            let re = Regex::new(r"^\.nop$")?;
 
             if re.is_match(&msg) {
                 context.server.send_privmsg(&target, "nop pls")?;
