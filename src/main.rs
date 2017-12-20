@@ -30,7 +30,6 @@ fn print_error_chain(error: Error, backtrace: bool) {
             writeln!(stderr, "Backtrace: {:?}", backtrace)
                 .expect(error_message);
         }
-
     }
 }
 
