@@ -19,11 +19,12 @@ jobs:
     docker:
       - image: rust:latest
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
-          name: Hello World
-          command: echo Hello World
+          name: Deploy Hank executable
+          command: scp target/release/hank hank@marc.cx:bin/hank
 
 workflows:
   version: 2
