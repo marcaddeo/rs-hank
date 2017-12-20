@@ -9,6 +9,9 @@ jobs:
       - run:
           name: Compile Hank
           command: cargo build --release
+      - store_artifacts:
+          path: target/release/hank
+          destination: hank
 
   deploy:
     docker:
