@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: /tmp
+    working_directory: /tmp/workspace
     docker:
       - image: rust:latest
     steps:
@@ -20,7 +20,7 @@ jobs:
       - image: debian:stretch
     steps:
       - attach_workspace:
-          at: /tmp/hank
+          at: /tmp/workspace
       - run:
           name: Hello World
           command: echo Hello World
