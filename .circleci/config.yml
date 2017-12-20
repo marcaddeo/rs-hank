@@ -9,14 +9,18 @@ jobs:
       - run:
           name: Compile Hank
           command: cargo build --release
-      - store_artifacts:
-          path: target/release/hank
-          destination: hank
+      - persist_to_workspace:
+          root: ~/hank
+          paths:
+            - target/release/hank
 
   deploy:
+    working_directory: ~/hank
     docker:
-      - image: rust:latest
+      - image: debian:stretch
     steps:
+      - attach_workspace:
+          at: ~/hank
       - run:
           name: Hello World
           command: echo Hello World
