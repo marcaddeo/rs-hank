@@ -24,6 +24,9 @@ jobs:
       - run:
           name: Deploy Hank executable
           command: scp -oStrictHostKeyChecking=no workspace/target/release/hank hank@marc.cx:bin/hank
+      - run:
+          name: Restart Hank
+          command: echo "Hello World!"
 
 workflows:
   version: 2
