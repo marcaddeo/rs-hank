@@ -1,18 +1,18 @@
 version: 2
 jobs:
   build:
-    working_directory: /tmp/workspace
+    working_directory: /home/rust/src
     docker:
-      - image: rust:latest
+      - image: ekidd/rust-musl-builder:latest
     steps:
       - checkout
       - run:
           name: Compile Hank
           command: cargo build --release
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: /home/rust/src/target/x86_64-unknown-linux-musl/release
           paths:
-            - target/release/hank
+            - hank
 
   deploy:
     working_directory: /tmp
@@ -20,10 +20,10 @@ jobs:
       - image: rust:latest
     steps:
       - attach_workspace:
-          at: /tmp/workspace
+          at: /tmp/hank-release
       - run:
           name: Deploy Hank executable
-          command: scp -oStrictHostKeyChecking=no workspace/target/release/hank hank@marc.cx:bin/hank
+          command: scp -oStrictHostKeyChecking=no hank hank@marc.cx:bin/hank
       - run:
           name: Restart Hank
           command: echo "Hello World!"
