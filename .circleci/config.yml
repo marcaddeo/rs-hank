@@ -19,7 +19,6 @@ jobs:
     docker:
       - image: rust:latest
     steps:
-      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - run:
