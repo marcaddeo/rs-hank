@@ -10,7 +10,7 @@ jobs:
           name: Compile Hank
           command: cargo build --release
       - persist_to_workspace:
-          root: hank
+          root: /tmp/workspace
           paths:
             - target/release/hank
 
