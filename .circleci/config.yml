@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/hank
     docker:
-      - image: dolphm/ubuntu-latest-rust-nightly
+      - image: joxit/rust-openssl:latest
     steps:
       - checkout
       - run:
@@ -12,7 +12,7 @@ jobs:
 
   deploy:
     docker:
-      - image: dolphm/ubuntu-latest-rust-nightly
+      - image: joxit/rust-openssl:latest
     steps:
       - run:
           name: Hello World
