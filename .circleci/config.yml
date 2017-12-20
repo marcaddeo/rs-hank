@@ -23,7 +23,7 @@ jobs:
           at: /tmp/workspace
       - run:
           name: Deploy Hank executable
-          command: scp -oStrictHostKeyChecking=no target/release/hank hank@marc.cx:bin/hank
+          command: scp -oStrictHostKeyChecking=no workspace/target/release/hank hank@marc.cx:bin/hank
 
 workflows:
   version: 2
