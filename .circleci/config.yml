@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/hank
+    working_directory: /tmp
     docker:
       - image: rust:latest
     steps:
@@ -10,17 +10,17 @@ jobs:
           name: Compile Hank
           command: cargo build --release
       - persist_to_workspace:
-          root: ~/hank
+          root: hank
           paths:
             - target/release/hank
 
   deploy:
-    working_directory: ~/hank
+    working_directory: /tmp
     docker:
       - image: debian:stretch
     steps:
       - attach_workspace:
-          at: ~/hank
+          at: /tmp/hank
       - run:
           name: Hello World
           command: echo Hello World
