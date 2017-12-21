@@ -3,12 +3,13 @@ error_chain! {
         IrcError(::irc::error::Error);
         RegexError(::regex::Error);
         EnvVarError(::std::env::VarError);
-        CurlError(::curl::Error);
         StringUtf8Error(::std::string::FromUtf8Error);
         SerdeJsonError(::serde_json::Error);
         TimeError(::time::ParseError);
         ParseIntError(::std::num::ParseIntError);
         UrlParseError(::url::ParseError);
+        IoError(::std::io::Error);
+        ReqwestError(::reqwest::Error);
     }
 
     errors {

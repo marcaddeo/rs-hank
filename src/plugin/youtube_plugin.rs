@@ -2,8 +2,9 @@ use std::env;
 use serde_json;
 use serde_json::Value;
 use time;
+use std::io::Read;
+use reqwest;
 use regex::Regex;
-use curl::easy::Easy;
 use irc::client::prelude::*;
 use plugin::{Plugin, PluginContext};
 use duration::parse_duration;
@@ -29,23 +30,14 @@ impl Plugin for YoutubePlugin {
                 None => return Ok(()), // bail, there was no youtube video found in the message
             };
 
-            let mut data = Vec::new();
-            let mut easy = Easy::new();
             let url = format!(
                 "https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id={video_id}&key={api_key}",
                 video_id = &captures["video_id"],
                 api_key = env::var("HANK_YOUTUBE_API_KEY")?,
             );
-            easy.url(&url)?;
-            {
-                let mut transfer = easy.transfer();
-                transfer.write_function(|new_data| {
-                    data.extend_from_slice(new_data);
-                    Ok(new_data.len())
-                })?;
-                transfer.perform()?;
-            }
-            let body = String::from_utf8(data.to_vec())?;
+            let mut res = reqwest::get(&url)?;
+            let mut body = String::new();
+            res.read_to_string(&mut body)?;
             let json: Value = serde_json::from_str(&body)?;
             let video = &json["items"][0];
             let video_title: String = serde_json::from_value(video["snippet"]["title"].clone())?;

@@ -1,6 +1,7 @@
 use regex::Regex;
-use curl::easy::Easy;
 use serde_json;
+use reqwest;
+use std::io::Read;
 use serde_json::Value;
 use irc::client::prelude::*;
 use plugin::{Plugin, PluginContext};
@@ -23,18 +24,9 @@ impl Plugin for BtcPlugin {
                 return Ok(());
             }
 
-            let mut data = Vec::new();
-            let mut easy = Easy::new();
-            easy.url("https://blockchain.info/ticker")?;
-            {
-                let mut transfer = easy.transfer();
-                transfer.write_function(|new_data| {
-                    data.extend_from_slice(new_data);
-                    Ok(new_data.len())
-                })?;
-                transfer.perform()?;
-            }
-            let body = String::from_utf8(data.to_vec())?;
+            let mut res = reqwest::get("https://blockchain.info/ticker")?;
+            let mut body = String::new();
+            res.read_to_string(&mut body)?;
             let json: Value = serde_json::from_str(&body)?;
 
             let message = format!(
