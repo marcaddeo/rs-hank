@@ -54,6 +54,7 @@ fn run() -> Result<()> {
         Box::new(nm_plugin::NmPlugin),
         Box::new(maize_plugin::MaizePlugin),
         Box::new(btc_plugin::BtcPlugin),
+        Box::new(ltc_plugin::LtcPlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
     ];
 

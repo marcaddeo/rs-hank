@@ -10,6 +10,7 @@ error_chain! {
         UrlParseError(::url::ParseError);
         IoError(::std::io::Error);
         ReqwestError(::reqwest::Error);
+        ParseFloatError(::std::num::ParseFloatError);
     }
 
     errors {
