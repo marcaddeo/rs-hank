@@ -41,7 +41,7 @@ jobs:
           command: scp -oStrictHostKeyChecking=no release/hank ${DEPLOY_USER}@${DEPLOY_HOST}:bin/hank
       - run:
           name: Start Hank
-          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@{$DEPLOY_HOST} 'pm2 start hank'
+          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'pm2 start hank'
 
 workflows:
   version: 2
