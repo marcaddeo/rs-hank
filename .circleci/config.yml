@@ -6,13 +6,23 @@ jobs:
       - image: ekidd/rust-musl-builder:latest
     steps:
       - checkout
+      - restore_cache:
+          key: cargo.registry
+      - restore_cache:
+          key: target-{{ checksum "Cargo.lock" }}
       - run:
           name: Compile Hank
           command: cargo build --release
+      - save_cache:
+          key: target-{{ checksum "Cargo.lock" }}
       - persist_to_workspace:
           root: /home/rust/src/target/x86_64-unknown-linux-musl/release
           paths:
             - hank
+      - save_cache:
+          key: cargo.registry
+          paths:
+            - /root/.cargo
 
   deploy:
     working_directory: /tmp
@@ -22,11 +32,14 @@ jobs:
       - attach_workspace:
           at: /tmp/release
       - run:
+          name: Stop Hank
+          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@{$DEPLOY_HOST} 'pm2 stop hank'
+      - run:
           name: Deploy Hank executable
           command: scp -oStrictHostKeyChecking=no release/hank ${DEPLOY_USER}@${DEPLOY_HOST}:bin/hank
       - run:
-          name: Restart Hank
-          command: echo "Hello World!"
+          name: Start Hank
+          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@{$DEPLOY_HOST} 'pm2 start hank'
 
 workflows:
   version: 2
