@@ -56,6 +56,7 @@ fn run() -> Result<()> {
         Box::new(btc_plugin::BtcPlugin),
         Box::new(ltc_plugin::LtcPlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
+        Box::new(calc_plugin::CalcPlugin),
     ];
 
     server.for_each_incoming(|message| {
