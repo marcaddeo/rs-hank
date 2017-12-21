@@ -35,7 +35,7 @@ jobs:
           at: /tmp/release
       - run:
           name: Stop Hank
-          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@{$DEPLOY_HOST} 'pm2 stop hank'
+          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'pm2 stop hank'
       - run:
           name: Deploy Hank executable
           command: scp -oStrictHostKeyChecking=no release/hank ${DEPLOY_USER}@${DEPLOY_HOST}:bin/hank
