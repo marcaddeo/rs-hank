@@ -79,7 +79,7 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - deploy:
+      - deploy-production:
           requires:
             - hold
           filters:
@@ -91,7 +91,7 @@ workflows:
   deploy-staging:
     jobs:
       - build
-      - deploy-staging
+      - deploy-staging:
           requires:
             - build
           filters:
