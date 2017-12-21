@@ -26,7 +26,7 @@ jobs:
           paths:
             - /root/.cargo
 
-  deploy:
+  deploy-production:
     working_directory: /tmp
     docker:
       - image: rust:latest
@@ -43,12 +43,55 @@ jobs:
           name: Start Hank
           command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'pm2 start hank'
 
+  deploy-staging:
+    working_directory: /tmp
+    docker:
+      - image: rust:latest
+    steps:
+      - attach_workspace:
+          at: /tmp/release
+      - run:
+          name: Stop Hank
+          command: ssh -oStrictHostKeyChecking=no hank-staging@${DEPLOY_HOST} 'pm2 stop hank'
+      - run:
+          name: Deploy Hank executable
+          command: scp -oStrictHostKeyChecking=no release/hank hank-staging@${DEPLOY_HOST}:bin/hank
+      - run:
+          name: Start Hank
+          command: ssh -oStrictHostKeyChecking=no hank-staging@${DEPLOY_HOST} 'pm2 start hank'
+
 workflows:
   version: 2
-  build-deploy:
+  deploy-production:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - hold:
+          type: approval
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - deploy:
+          requires:
+            - hold
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+  deploy-staging:
     jobs:
       - build
-      - deploy:
+      - deploy-staging
           requires:
             - build
           filters:
