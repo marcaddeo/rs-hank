@@ -45,6 +45,7 @@ fn run() -> Result<()> {
         Box::new(ltc_plugin::LtcPlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
         Box::new(calc_plugin::CalcPlugin),
+        Box::new(markov_chain_plugin::MarkovChainPlugin::new()?),
     ];
 
     let config = Config {

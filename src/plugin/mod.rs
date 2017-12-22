@@ -11,6 +11,7 @@ pub mod btc_plugin;
 pub mod ltc_plugin;
 pub mod lmgtfy_plugin;
 pub mod calc_plugin;
+pub mod markov_chain_plugin;
 
 pub trait Plugin: 'static {
     fn will_handle(&self, command: Command) -> bool;
