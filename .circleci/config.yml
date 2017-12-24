@@ -1,9 +1,9 @@
 version: 2
 jobs:
   build:
-    working_directory: /home/rust/src
+    working_directory: /volume
     docker:
-      - image: ekidd/rust-musl-builder:latest
+      - image: clux/muslrust
     steps:
       - checkout
       - restore_cache:
@@ -18,7 +18,7 @@ jobs:
           paths:
             - target
       - persist_to_workspace:
-          root: /home/rust/src/target/x86_64-unknown-linux-musl/release
+          root: /volume/target/x86_64-unknown-linux-musl/release
           paths:
             - hank
       - save_cache:
