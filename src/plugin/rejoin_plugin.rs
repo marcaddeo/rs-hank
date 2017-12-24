@@ -13,7 +13,7 @@ impl Plugin for RejoinPlugin {
         }
     }
 
-    fn handle(&self, context: &PluginContext) -> Result<()> {
+    fn handle(&mut self, context: &PluginContext) -> Result<()> {
         let server = context.server.clone();
         if let Command::KICK(channel, _, _) = context.message.command.clone()  {
             thread::spawn(move || {
