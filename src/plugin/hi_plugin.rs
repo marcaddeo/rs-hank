@@ -14,7 +14,7 @@ impl Plugin for HiPlugin {
         }
     }
 
-    fn handle(&self, context: &PluginContext) -> Result<()> {
+    fn handle(&mut self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             let re = Regex::new(
                 &format!(r"(?i)h(i?) {}", context.server.config().nickname())

@@ -14,7 +14,7 @@ pub mod calc_plugin;
 
 pub trait Plugin: 'static {
     fn will_handle(&self, command: Command) -> bool;
-    fn handle(&self, context: &PluginContext) -> Result<()>;
+    fn handle(&mut self, context: &PluginContext) -> Result<()>;
 }
 
 pub struct PluginContext<'a> {
