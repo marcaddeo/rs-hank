@@ -10,6 +10,7 @@ extern crate serde_json;
 extern crate irc;
 extern crate url;
 extern crate calc;
+extern crate markov;
 
 pub mod errors;
 pub mod duration;

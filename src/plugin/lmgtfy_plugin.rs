@@ -13,7 +13,7 @@ impl Plugin for LmgtfyPlugin {
         }
     }
 
-    fn handle(&self, context: &PluginContext) -> Result<()> {
+    fn handle(&mut self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             let re = Regex::new(r"^\.g (?P<search_term>.*)")?;
 

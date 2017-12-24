@@ -46,7 +46,7 @@ fn run() -> Result<()> {
 
     server.identify()?;
 
-    let plugins: Vec<Box<Plugin>> = vec![
+    let mut plugins: Vec<Box<Plugin>> = vec![
         Box::new(rejoin_plugin::RejoinPlugin),
         Box::new(youtube_plugin::YoutubePlugin),
         Box::new(nop_plugin::NopPlugin),
@@ -57,13 +57,14 @@ fn run() -> Result<()> {
         Box::new(ltc_plugin::LtcPlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
         Box::new(calc_plugin::CalcPlugin),
+        Box::new(markov_chain_plugin::MarkovChainPlugin::new()?),
     ];
 
     server.for_each_incoming(|message| {
         print!("{}", message);
 
         let context = PluginContext::new(&server, &message);
-        for plugin in plugins.iter() {
+        for plugin in plugins.iter_mut() {
             if plugin.will_handle(message.command.clone()) {
                 match plugin.handle(&context) {
                     Ok(()) => (),
