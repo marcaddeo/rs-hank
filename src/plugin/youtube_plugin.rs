@@ -19,7 +19,7 @@ impl Plugin for YoutubePlugin {
         }
     }
 
-    fn handle(&self, context: &PluginContext) -> Result<()> {
+    fn handle(&mut self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             let re = Regex::new(
                 r"^.*((youtu.be/)|(v/)|(/u/\w/)|(embed/)|(watch\?))\??v?=?(?P<video_id>[^#\&\?\s]*).*"
