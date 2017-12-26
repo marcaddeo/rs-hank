@@ -30,22 +30,10 @@ fn print_error_chain(error: Error, backtrace: bool) {
             writeln!(stderr, "Backtrace: {:?}", backtrace)
                 .expect(error_message);
         }
-
     }
 }
 
 fn run() -> Result<()> {
-    let config = Config {
-        nickname: Some(env::var("HANK_NICK").unwrap_or(format!("Hank"))),
-        nick_password: Some(env::var("HANK_PASS")?),
-        server: Some(format!("irc.rizon.net")),
-        channels: Some(vec![env::var("HANK_CHANNEL")?]),
-        .. Default::default()
-    };
-    let server = IrcServer::from_config(config)?;
-
-    server.identify()?;
-
     let mut plugins: Vec<Box<Plugin>> = vec![
         Box::new(rejoin_plugin::RejoinPlugin),
         Box::new(youtube_plugin::YoutubePlugin),
@@ -59,6 +47,16 @@ fn run() -> Result<()> {
         Box::new(calc_plugin::CalcPlugin),
     ];
 
+    let config = Config {
+        nickname: Some(env::var("HANK_NICK").unwrap_or(format!("Hank"))),
+        nick_password: Some(env::var("HANK_PASS")?),
+        server: Some(format!("irc.rizon.net")),
+        channels: Some(vec![env::var("HANK_CHANNEL")?]),
+        .. Default::default()
+    };
+    let server = IrcServer::from_config(config)?;
+
+    server.identify()?;
     server.for_each_incoming(|message| {
         print!("{}", message);
 
