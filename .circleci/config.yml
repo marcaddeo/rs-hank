@@ -27,47 +27,50 @@ jobs:
             - /root/.cargo
 
   deploy-production:
-    working_directory: /tmp
+    working_directory: /tmp/hank
     docker:
       - image: rust:latest
     steps:
+      - checkout
       - attach_workspace:
-          at: /tmp/release
+          at: /tmp/hank/release
       - run:
-          name: Stop Hank
-          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'pm2 stop hank'
-      - run:
-          name: Deploy Hank executable
-          command: scp -oStrictHostKeyChecking=no release/hank ${DEPLOY_USER}@${DEPLOY_HOST}:bin/hank
-      - run:
-          name: Start Hank
-          command: ssh -oStrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'pm2 start hank'
+          name: Deploy Hank
+          command: bin/deploy $DEPLOY_USER $DEPLOY_HOST release/hank
 
   deploy-staging:
-    working_directory: /tmp
+    working_directory: /tmp/hank
     docker:
       - image: rust:latest
     steps:
+      - checkout
       - attach_workspace:
-          at: /tmp/release
+          at: /tmp/hank/release
       - run:
-          name: Stop Hank
-          command: ssh -oStrictHostKeyChecking=no hank-staging@${DEPLOY_HOST} 'pm2 stop hank'
+          name: Deploy Hank
+          command: bin/deploy hank-staging $DEPLOY_HOST release/hank
+
+  deploy-development:
+    working_directory: /tmp/hank
+    docker:
+      - image: rust:latest
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/hank/release
       - run:
-          name: Deploy Hank executable
-          command: scp -oStrictHostKeyChecking=no release/hank hank-staging@${DEPLOY_HOST}:bin/hank
-      - run:
-          name: Start Hank
-          command: ssh -oStrictHostKeyChecking=no hank-staging@${DEPLOY_HOST} 'pm2 start hank'
+          name: Deploy Hank
+          command: bin/deploy hank-development $DEPLOY_HOST release/hank
 
 workflows:
   version: 2
-  deploy-production:
+
+  production:
     jobs:
       - build:
           filters:
             tags:
-              only: /^v.*/
+              only: /^\d+\.\d+\.\d+.*/
             branches:
               ignore: /.*/
       - deploy-staging:
@@ -75,7 +78,7 @@ workflows:
             - build
           filters:
             tags:
-              only: /^v.*/
+              only: /^\d+\.\d+\.\d+.*/
             branches:
               ignore: /.*/
       - hold:
@@ -84,7 +87,7 @@ workflows:
             - deploy-staging
           filters:
             tags:
-              only: /^v.*/
+              only: /^\d+\.\d+\.\d+.*/
             branches:
               ignore: /.*/
       - deploy-production:
@@ -92,16 +95,29 @@ workflows:
             - hold
           filters:
             tags:
-              only: /^v.*/
+              only: /^\d+\.\d+\.\d+.*/
             branches:
               ignore: /.*/
 
-  deploy-staging:
+  staging:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              only: master
       - deploy-staging:
           requires:
             - build
           filters:
             branches:
-              only: staging
+              only: master
+
+  development:
+    jobs:
+      - build # Run the development build job on all commits
+      - deploy-development:
+          requires:
+            - build
+          filters:
+            branches:
+              only: development

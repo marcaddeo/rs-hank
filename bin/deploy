@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+DEPLOY_USER="$1"
+DEPLOY_HOST="$2"
+DEPLOY_SOURCE="$3"
+DEPLOY_TARGET="${4:-bin/hank}"
+
+# Stop Hank
+ssh -oStrictHostKeyChecking=no "$DEPLOY_USER"@"$DEPLOY_HOST" 'pm2 stop hank'
+# Deploy Hank executable
+scp -oStrictHostKeyChecking=no "$DEPLOY_SOURCE" "$DEPLOY_USER"@"$DEPLOY_HOST":"$DEPLOY_TARGET"
+# Start Hank
+ssh -oStrictHostKeyChecking=no "$DEPLOY_USER"@"$DEPLOY_HOST" 'pm2 start hank'
