@@ -50,18 +50,6 @@ jobs:
           name: Deploy Hank
           command: bin/deploy hank-staging $DEPLOY_HOST release/hank
 
-  deploy-development:
-    working_directory: /tmp/hank
-    docker:
-      - image: rust:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/hank/release
-      - run:
-          name: Deploy Hank
-          command: bin/deploy hank-development $DEPLOY_HOST release/hank
-
 workflows:
   version: 2
 
@@ -118,9 +106,3 @@ workflows:
           filters:
             branches:
               ignore: master
-      - deploy-development:
-          requires:
-            - build
-          filters:
-            branches:
-              only: development
