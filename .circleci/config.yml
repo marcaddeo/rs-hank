@@ -114,7 +114,10 @@ workflows:
 
   development:
     jobs:
-      - build # Run the development build job on all commits
+      - build:
+          filters:
+            branches:
+              ignore: master
       - deploy-development:
           requires:
             - build
