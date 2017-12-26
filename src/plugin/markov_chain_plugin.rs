@@ -75,10 +75,7 @@ impl Plugin for MarkovChainPlugin {
                 response = self.chain.generate_str();
             }
 
-            context.server.send_privmsg(
-                &target,
-                &response
-            )?;
+            context.server.send_privmsg(&target, &response)?;
         }
 
         Ok(())
