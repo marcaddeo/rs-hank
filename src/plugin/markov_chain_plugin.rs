@@ -1,4 +1,6 @@
 use std::env;
+use std::io::{BufReader, BufRead};
+use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use regex::Regex;
@@ -13,8 +15,19 @@ pub struct MarkovChainPlugin {
 
 impl MarkovChainPlugin {
     pub fn new() -> Result<MarkovChainPlugin> {
+        let path = get_log_file()?;
+        let file = File::open(path)?;
         let mut chain: Chain<String> = Chain::new();
-        chain.feed_file(get_log_file()?);
+
+        for line in BufReader::new(file).lines() {
+            let line = match line {
+                Ok(line) => line,
+                Err(_) => {
+                    continue;
+                }
+            };
+            chain.feed_str(line.as_str());
+        }
 
         Ok(MarkovChainPlugin {
             chain: chain,
@@ -62,10 +75,7 @@ impl Plugin for MarkovChainPlugin {
                 response = self.chain.generate_str();
             }
 
-            context.server.send_privmsg(
-                &target,
-                &response
-            )?;
+            context.server.send_privmsg(&target, &response)?;
         }
 
         Ok(())
