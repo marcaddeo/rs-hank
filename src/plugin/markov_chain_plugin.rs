@@ -61,7 +61,7 @@ impl Plugin for MarkovChainPlugin {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             self.process_message(&msg)?;
 
-            let re = Regex::new(r"(?i)^Hank.*? (?P<message>.*)$")?;
+            let re = Regex::new(r"(?i)^Hank.? (?P<message>.*)$")?;
             let captures = match re.captures(&msg) {
                 Some(captures) => captures,
                 None => return Ok(()), // bail, not a message to Hank
