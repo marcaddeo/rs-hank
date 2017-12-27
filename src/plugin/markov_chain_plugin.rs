@@ -22,9 +22,7 @@ impl MarkovChainPlugin {
         for line in BufReader::new(file).lines() {
             let line = match line {
                 Ok(line) => line,
-                Err(_) => {
-                    continue;
-                }
+                Err(_) => continue,
             };
             chain.feed_str(line.as_str());
         }
@@ -34,7 +32,7 @@ impl MarkovChainPlugin {
         })
     }
 
-    pub fn process_message(&mut self, message: &str) -> Result<()> {
+    fn process_message(&mut self, message: &str) -> Result<()> {
         let message = message.to_lowercase();
         let path = get_log_file()?;
         let mut file = OpenOptions::new()
@@ -60,8 +58,8 @@ impl Plugin for MarkovChainPlugin {
     fn handle(&mut self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             self.process_message(&msg)?;
-            let re = Regex::new(r"(?i)^Hank*? (?P<message>.*)$")?;
 
+            let re = Regex::new(r"(?i)^Hank.*? (?P<message>.*)$")?;
             let captures = match re.captures(&msg) {
                 Some(captures) => captures,
                 None => return Ok(()), // bail, not a message to Hank
