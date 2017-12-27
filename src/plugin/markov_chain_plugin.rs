@@ -5,6 +5,8 @@ use std::fs::OpenOptions;
 use std::io::prelude::*;
 use regex::Regex;
 use markov::Chain;
+use rand;
+use rand::Rng;
 use irc::client::prelude::*;
 use plugin::{Plugin, PluginContext};
 use errors::*;
@@ -64,16 +66,17 @@ impl Plugin for MarkovChainPlugin {
                 Some(captures) => captures,
                 None => return Ok(()), // bail, not a message to Hank
             };
-
             let message = &captures["message"].to_lowercase();
-            let mut response
-                = self.chain.generate_str_from_token(message);
+            let words: Vec<&str> = message.split(' ').collect();
+            let word = match rand::thread_rng().choose(&words) {
+                Some(word) => word,
+                _ => return Ok(()),
+            };
+            let response = self.chain.generate_str_from_token(word);
 
-            if response.is_empty() {
-                response = self.chain.generate_str();
+            if !response.is_empty() {
+                context.server.send_privmsg(&target, &response)?;
             }
-
-            context.server.send_privmsg(&target, &response)?;
         }
 
         Ok(())
