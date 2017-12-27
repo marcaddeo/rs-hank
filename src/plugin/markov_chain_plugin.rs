@@ -72,10 +72,17 @@ impl Plugin for MarkovChainPlugin {
                 Some(word) => word,
                 _ => return Ok(()),
             };
-            let response = self.chain.generate_str_from_token(word);
+            let mut attempts = 0;
+            while attempts < 100 {
+                let response = self.chain.generate_str_from_token(word);
+                let words: Vec<&str> = response.split(' ').collect();
 
-            if !response.is_empty() {
-                context.server.send_privmsg(&target, &response)?;
+                if words.len() >= 3 {
+                    context.server.send_privmsg(&target, &response)?;
+                    break;
+                }
+
+                attempts += 1;
             }
         }
 
