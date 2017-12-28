@@ -75,7 +75,10 @@ impl Plugin for MarkovChainPlugin {
             let mut attempts = 0;
             while attempts < 100 {
                 let response = self.chain.generate_str_from_token(word);
-                let words: Vec<&str> = response.split(' ').collect();
+                let words: Vec<&str> = response
+                    .split(' ')
+                    .filter(|word| !word.is_empty())
+                    .collect();
 
                 if words.len() >= 3 {
                     context.server.send_privmsg(&target, &response)?;
