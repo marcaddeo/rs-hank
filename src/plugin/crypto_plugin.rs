@@ -101,7 +101,7 @@ impl Plugin for CryptoPlugin {
     fn handle(&mut self, context: &PluginContext) -> Result<()> {
         if let Command::PRIVMSG(target, msg) = context.message.command.clone() {
             let re = Regex::new(&format!(
-                r#"(?i)\.(?P<command>crypto|{})( (?P<symbol>.*))?"#,
+                r#"(?i)^\.(?P<command>crypto|{})( (?P<symbol>.*))?"#,
                 self.watchlist.join("|"),
             ))?;
 
