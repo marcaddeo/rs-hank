@@ -334,7 +334,7 @@ dependencies = [
 
 [[package]]
 name = "hank"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "calculate 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
