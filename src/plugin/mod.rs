@@ -7,12 +7,10 @@ pub mod nop_plugin;
 pub mod hi_plugin;
 pub mod nm_plugin;
 pub mod maize_plugin;
-pub mod btc_plugin;
-pub mod ltc_plugin;
 pub mod lmgtfy_plugin;
 pub mod calc_plugin;
 pub mod markov_chain_plugin;
-pub mod eth_plugin;
+pub mod crypto_plugin;
 
 pub trait Plugin: 'static {
     fn will_handle(&self, command: Command) -> bool;

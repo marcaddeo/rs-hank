@@ -34,6 +34,13 @@ fn print_error_chain(error: Error, backtrace: bool) {
 }
 
 fn run() -> Result<()> {
+    let watchlist = env::var("HANK_CRYPTO_WATCHLIST").unwrap_or(
+        "BTC,LTC,ETH,XRP".to_string()
+    ).replace(" ", "");
+    let watchlist: Vec<String> = watchlist.split(',')
+        .map(|coin| coin.to_string())
+        .collect();
+
     let mut plugins: Vec<Box<Plugin>> = vec![
         Box::new(rejoin_plugin::RejoinPlugin),
         Box::new(youtube_plugin::YoutubePlugin),
@@ -41,12 +48,10 @@ fn run() -> Result<()> {
         Box::new(hi_plugin::HiPlugin),
         Box::new(nm_plugin::NmPlugin),
         Box::new(maize_plugin::MaizePlugin),
-        Box::new(btc_plugin::BtcPlugin),
-        Box::new(ltc_plugin::LtcPlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
         Box::new(calc_plugin::CalcPlugin),
         Box::new(markov_chain_plugin::MarkovChainPlugin::new()?),
-        Box::new(eth_plugin::EthPlugin),
+        Box::new(crypto_plugin::CryptoPlugin::new(watchlist)?),
     ];
 
     let config = Config {
