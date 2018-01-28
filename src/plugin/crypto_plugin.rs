@@ -20,7 +20,7 @@ pub enum PriceChange {
 #[derive(Debug)]
 pub struct CryptoPlugin {
     watchlist: Vec<String>,
-    coinlist: Vec<String>,
+    coinlist: HashMap<String, String>,
     prices: HashMap<String, f64>,
 }
 impl CryptoPlugin {
@@ -32,10 +32,17 @@ impl CryptoPlugin {
         res.read_to_string(&mut body)?;
         let json: Value = serde_json::from_str(&body)?;
 
-        let mut coinlist: Vec<String> = Vec::new();
+        let mut coinlist: HashMap<String, String> = HashMap::new();
         if let Some(data) = json["Data"].as_object() {
-            for (symbol, _) in data {
-                coinlist.push(symbol.to_string().to_uppercase());
+            for (symbol, coin) in data {
+                let full_name = coin["FullName"].as_str()
+                    .ok_or("Error converting FullName to str")?
+                    .to_string();
+
+                coinlist.insert(
+                    symbol.to_string().to_uppercase(),
+                    full_name,
+                );
             }
         }
 
@@ -49,7 +56,7 @@ impl CryptoPlugin {
     fn get_price(&mut self, symbol: &str) -> Result<(f64, PriceChange)> {
         let symbol = symbol.to_string().to_uppercase();
 
-        if !self.coinlist.contains(&symbol) {
+        if !self.coinlist.contains_key(&symbol) {
             bail!("Invalid coin symbol");
         }
 
@@ -106,9 +113,12 @@ impl Plugin for CryptoPlugin {
             let symbol = match &captures["command"] {
                 "crypto" => &captures["symbol"],
                 _ => &captures["command"],
-            };
+            }.to_uppercase();
 
-            let (price, change) = self.get_price(symbol)?;
+            let coinlist = self.coinlist.clone();
+            let full_name = coinlist.get(&symbol)
+                .ok_or("Error retrieving coin name")?;
+            let (price, change) = self.get_price(&symbol)?;
             let change_symbol = match change {
                 PriceChange::Increase => "\x0303▲\x0F",
                 PriceChange::Decrease => "\x0304▼\x0F",
@@ -116,7 +126,8 @@ impl Plugin for CryptoPlugin {
                 _ => "",
             };
             context.server.send_privmsg(&target, &format!(
-                "${} {}",
+                "{}: ${} {}",
+                full_name,
                 price.separated_string_with_fixed_place(2),
                 change_symbol,
             ))?;
