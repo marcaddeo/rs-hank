@@ -11,6 +11,7 @@ extern crate irc;
 extern crate url;
 extern crate calc;
 extern crate markov;
+extern crate separator;
 
 pub mod errors;
 pub mod duration;
