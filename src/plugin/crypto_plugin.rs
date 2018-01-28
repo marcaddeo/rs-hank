@@ -107,11 +107,14 @@ impl Plugin for CryptoPlugin {
 
             let captures = match re.captures(&msg) {
                 Some(captures) => captures,
-                None => return Ok(()), // bail, there was no search term
+                None => return Ok(()), // bail, there was no command
             };
 
             let symbol = match &captures["command"] {
-                "crypto" => &captures["symbol"],
+                "crypto" => match captures.name("symbol") {
+                    Some(symbol) => symbol.as_str(),
+                    None => return Ok(()), // bail, there was no symbol
+                },
                 _ => &captures["command"],
             }.to_uppercase();
 
