@@ -44,9 +44,7 @@ fn run() -> Result<()> {
     let mut plugins: Vec<Box<Plugin>> = vec![
         Box::new(rejoin_plugin::RejoinPlugin),
         Box::new(youtube_plugin::YoutubePlugin),
-        Box::new(nop_plugin::NopPlugin),
         Box::new(hi_plugin::HiPlugin),
-        Box::new(nm_plugin::NmPlugin),
         Box::new(maize_plugin::MaizePlugin),
         Box::new(lmgtfy_plugin::LmgtfyPlugin),
         Box::new(calc_plugin::CalcPlugin),

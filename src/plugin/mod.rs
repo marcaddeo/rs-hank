@@ -3,9 +3,7 @@ use errors::*;
 
 pub mod rejoin_plugin;
 pub mod youtube_plugin;
-pub mod nop_plugin;
 pub mod hi_plugin;
-pub mod nm_plugin;
 pub mod maize_plugin;
 pub mod lmgtfy_plugin;
 pub mod calc_plugin;
