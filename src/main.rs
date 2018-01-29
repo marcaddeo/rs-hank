@@ -67,11 +67,9 @@ fn run() -> Result<()> {
 
         let context = PluginContext::new(&server, &message);
         for plugin in plugins.iter_mut() {
-            if plugin.will_handle(message.command.clone()) {
-                match plugin.handle(&context) {
-                    Ok(()) => (),
-                    Err(error) => print_error_chain(error, false),
-                }
+            match plugin.handle(&context) {
+                Ok(()) => (),
+                Err(error) => print_error_chain(error, false),
             }
         }
     })?;

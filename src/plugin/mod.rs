@@ -11,7 +11,6 @@ pub mod markov_chain_plugin;
 pub mod crypto_plugin;
 
 pub trait Plugin: 'static {
-    fn will_handle(&self, command: Command) -> bool;
     fn handle(&mut self, context: &PluginContext) -> Result<()>;
 }
 
